@@ -1,0 +1,200 @@
+body {
+    background: linear-gradient(135deg, #dbeafe 0%, #f0fdf4 100%);
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    padding-top: 62px;
+}
+.header {
+    position: fixed;
+    left: 0; top: 0; right: 0;
+    height: 56px;
+    background: rgba(255,255,255,0.96);
+    display: flex;
+    align-items: center;
+    z-index: 10;
+    padding-left: 22px;
+    box-shadow: 0 2px 8px rgba(54, 162, 235, 0.08);
+}
+#avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 100%;
+    margin-right: 14px;
+    background: #eee;
+    object-fit: cover;
+    border: 2px solid #dbeafe;
+}
+#user-info {
+    font-weight: 600;
+    font-size: 16px;
+    color: #2563eb;
+    margin-right: 12px;
+}
+#logout-btn {
+    margin-left: auto;
+    margin-right: 16px;
+    background: #f43f5e;
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#logout-btn:hover {
+    background: #be123c;
+}
+
+.chat-container {
+    max-width: 650px;
+    margin: 60px auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(38, 94, 196, 0.08), 0 2px 8px rgba(54, 162, 235, 0.08);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+h2 {
+    text-align: center;
+    color: #2563eb;
+    font-size: 1.7rem;
+    margin: 22px 0 14px 0;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+#chat-box {
+    height: 520px;
+    overflow-y: auto;
+    background: #f4f7fa;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 28px 22px 18px 22px;
+    margin-bottom: 0;
+    font-size: 18px;
+    transition: background 0.25s;
+    scroll-behavior: smooth;
+}
+.message {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-end;
+    animation: fadeIn 0.4s;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+.message.own {
+    justify-content: flex-end;
+}
+
+.message-bubble {
+    background: #e8fff3;
+    padding: 12px 14px 7px 14px;
+    border-radius: 13px;
+    margin: 9px 0;
+    min-width: 120px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.message-bubble .username {
+    font-weight: bold;
+    color: #22c55e;
+    font-size: 1rem;
+    margin-bottom: 1px;
+    display: block;
+}
+.message-bubble .text {
+    margin-bottom: 7px;
+    word-break: break-word;
+    font-size: 1.11rem;
+}
+
+.message-bubble .timestamp {
+    font-size: 0.84rem;
+    color: #6b7280;
+    margin-top: 2px;
+    align-self: flex-end;
+    /* opacity: 0.7; */
+}
+
+.message .username {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1d4ed8;
+    display: block;
+    margin-bottom: 3px;
+}
+.message.own .username {
+    color: #159f39;
+}
+
+#chat-form {
+    display: flex;
+    gap: 10px;
+    padding: 16px 18px;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+}
+#message {
+    flex: 1;
+    padding: 7px 12px;
+    border: 1.2px solid #c7d1e1;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+#message:focus {
+    border-color: #2563eb;
+}
+button[type="submit"] {
+    background: linear-gradient(90deg, #2563eb 80%, #1e40af 100%);
+    color: #fff;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.16s, box-shadow 0.16s;
+    box-shadow: 0 2px 7px rgba(37,99,235,0.13);
+    outline: none;
+}
+button[type="submit"]:hover {
+    background: linear-gradient(90deg, #1e40af 60%, #2563eb 100%);
+}
+@media (max-width: 800px) {
+    .chat-container {
+        max-width: 99vw;
+        margin: 10px;
+    }
+    #chat-box {
+        height: 300px;
+        padding: 10px 6px 8px 6px;
+    }
+    #chat-form {
+        padding: 9px 6px;
+    }
+}
+.error {
+    color: #e11d48;
+    font-size: 15px;
+    margin-top: 4px;
+}
+#avatar-link {
+    display: inline-block;
+}
+#avatar {
+    cursor: pointer;
+    transition: box-shadow 0.18s;
+}
+#avatar:hover {
+    box-shadow: 0 0 0 2px #2563eb66, 0 1px 10px #2563eb11;
+}

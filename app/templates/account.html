@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Акаунт</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    .account-box { max-width:400px; margin:70px auto 0; background:#fff; border-radius:16px; box-shadow:0 2px 14px #2563eb11; padding:34px 32px 32px 32px;}
+    .acc-title { font-size:1.35rem; font-weight:600; margin-bottom:18px; color:#2563eb; }
+    .acc-field { margin-bottom:16px; }
+    .acc-label { font-size:0.98rem; color:#475569; }
+    .acc-value { font-size:1.05rem; font-weight:500; }
+    .acc-form input { width:100%; padding:9px 12px; border-radius:8px; border:1px solid #dbeafe; margin-bottom:10px; }
+    .acc-form button { padding:10px 0; background:#2563eb; color:#fff; border:none; border-radius:8px; font-weight:bold; width:100%; }
+    .acc-form .error { color:#e11d48; margin-bottom:10px; }
+    .acc-form .success { color:#22c55e; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+<div class="account-box">
+  <div class="acc-title">Ваш акаунт</div>
+  <div class="acc-field"><span class="acc-label">Логін: </span><span id="acc-username" class="acc-value"></span></div>
+  <div class="acc-field"><span class="acc-label">Дата реєстрації: </span><span id="acc-registered" class="acc-value"></span></div>
+  <hr style="margin:18px 0;">
+  <form class="acc-form" id="change-pass-form" autocomplete="off">
+    <div><b>Зміна пароля</b></div>
+    <input type="password" id="old-password" placeholder="Старий пароль" required>
+    <input type="password" id="new-password" placeholder="Новий пароль" required>
+    <button type="submit">Змінити пароль</button>
+    <div class="error" id="pass-error"></div>
+    <div class="success" id="pass-success"></div>
+  </form>
+  <a href="/" style="display:block;text-align:right;margin-top:10px;color:#2563eb;">← Повернутись у чат</a>
+</div>
+
+<script>
+let csrfToken = null;
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "/login";
+
+async function ensureCsrf() {
+  if (csrfToken) return csrfToken;
+  const r = await fetch("/csrf-token");
+  const d = await r.json();
+  csrfToken = d.csrf_token;
+  return csrfToken;
+}
+
+fetch("/me", { headers: { "Authorization": "Bearer " + token } })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(user => {
+    document.getElementById("acc-username").innerText = user.username;
+    if (user.registered_at) {
+      const t = typeof user.registered_at === "string" ? user.registered_at : user.registered_at.toString();
+      document.getElementById("acc-registered").innerText = t.replace("T", " ").slice(0,19);
+    }
+  })
+  .catch(() => window.location.href = "/login");
+
+document.getElementById("change-pass-form").onsubmit = async e => {
+  e.preventDefault();
+  const old_password = document.getElementById("old-password").value;
+  const new_password = document.getElementById("new-password").value;
+  document.getElementById("pass-error").innerText = "";
+  document.getElementById("pass-success").innerText = "";
+  try {
+    await ensureCsrf();
+    const resp = await fetch("/change-password", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token,
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken
+      },
+      body: JSON.stringify({ old_password, new_password })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || "Помилка");
+    document.getElementById("pass-success").innerText = "Пароль успішно змінено!";
+    document.getElementById("old-password").value = "";
+    document.getElementById("new-password").value = "";
+  } catch (err) {
+    document.getElementById("pass-error").innerText = err.message;
+  }
+};
+</script>
+</body>
+</html>

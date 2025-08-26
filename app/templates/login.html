@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Вхід / Реєстрація</title>
+  <link rel="stylesheet" href="/static/css/login.css" />
+</head>
+<body>
+<div class="login-wrapper">
+  <div class="login-box">
+    <h2 id="login-title">Вхід</h2>
+    <form id="login-form" autocomplete="off">
+      <input type="text" id="login-username" placeholder="Ім'я користувача" required />
+      <input type="password" id="login-password" placeholder="Пароль" required />
+      <button type="submit">Увійти</button>
+    </form>
+    <div style="margin:12px 0 2px 0;">
+      <span id="toggle-form" style="color:#2563eb;cursor:pointer;">Зареєструватись</span>
+    </div>
+    <div id="login-error" class="error"></div>
+  </div>
+</div>
+<script>
+  let csrfToken = null;
+  let isRegister = false;
+  
+  const loginForm = document.getElementById("login-form");
+  const loginUsername = document.getElementById("login-username");
+  const loginPassword = document.getElementById("login-password");
+  const loginError = document.getElementById("login-error");
+  const toggleForm = document.getElementById("toggle-form");
+  const loginTitle = document.getElementById("login-title");
+  
+  async function ensureCsrf() {
+    if (csrfToken) return csrfToken;
+    const r = await fetch("/csrf-token");
+    const d = await r.json();
+    csrfToken = d.csrf_token;
+    return csrfToken;
+  }
+  
+  function switchForm(toRegister, hintMsg = "") {
+    isRegister = toRegister;
+    loginForm.reset();
+    loginError.innerText = hintMsg;
+    loginTitle.innerText = isRegister ? "Реєстрація" : "Вхід";
+    loginForm.querySelector("button").innerText = isRegister ? "Зареєструватись" : "Увійти";
+    toggleForm.innerText = isRegister ? "Вже є акаунт? Увійти" : "Зареєструватись";
+  }
+  
+  toggleForm.onclick = () => switchForm(!isRegister);
+  
+  loginForm.onsubmit = async (e) => {
+    e.preventDefault();
+    loginError.innerText = "";
+    const data = { username: loginUsername.value.trim(), password: loginPassword.value };
+    try {
+      await ensureCsrf();
+      const res = await fetch(isRegister ? "/register" : "/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },
+        body: JSON.stringify(data)
+      });
+      const resp = await res.json();
+      if (!res.ok) {
+        if (!isRegister && (resp.detail === "Невірний логін або пароль" || (resp.detail||"").toLowerCase().includes("not found"))) {
+          switchForm(true, "Такого користувача не існує. Зареєструйтесь.");
+          return;
+        }
+        throw new Error(resp.detail || "Помилка");
+      }
+      if (resp.access_token) {
+        localStorage.setItem("token", resp.access_token);
+        window.location.href = "/";
+      } else if (isRegister) {
+        const r2 = await fetch("/login", {
+          method: "POST",
+          headers: {"Content-Type":"application/json", "X-CSRF-Token": csrfToken},
+          body: JSON.stringify(data)
+        });
+        const d2 = await r2.json();
+        if (r2.ok && d2.access_token) {
+          localStorage.setItem("token", d2.access_token);
+          window.location.href = "/";
+        } else {
+          throw new Error(d2.detail || "Не вдалося увійти після реєстрації");
+        }
+      }
+    } catch (err) {
+      loginError.innerText = err.message;
+    }
+  };
+  
+  (async function redirectIfValidToken() {
+    const token = localStorage.getItem("token");
+    if (!token) return;  
+  
+    try {
+      const res = await fetch("/me", { headers: { "Authorization": "Bearer " + token } });
+      if (res.ok) {
+        window.location.href = "/";
+      } else {
+        localStorage.removeItem("token");
+      }
+    } catch {
+      localStorage.removeItem("token");
+    }
+  })();
+  </script>
+  
+</body>
+</html>

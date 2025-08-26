@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Демо задач Celery</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    .box { max-width:560px; margin:60px auto; background:#fff; border-radius:16px; box-shadow:0 2px 14px #2563eb11; padding:24px; }
+    .title { font-size:1.35rem; font-weight:700; color:#2563eb; margin-bottom:10px; }
+    .row { margin:10px 0; }
+    .progress { height:12px; background:#e5e7eb; border-radius:999px; overflow:hidden; }
+    .bar { height:100%; width:0%; background:#2563eb; transition:width .2s; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    button { padding:10px 14px; border:0; border-radius:8px; background:#2563eb; color:#fff; font-weight:600; cursor:pointer; }
+    input { padding:8px 10px; border:1px solid #dbeafe; border-radius:8px; width:100px; }
+    .muted { color:#64748b; font-size:.95rem; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="title">Демо фонових задач (Celery + Redis)</div>
+
+    <div class="row">
+      <label class="muted">Тривалість (сек): <input type="number" id="sec" value="10" min="1"></label>
+      <label class="muted" style="margin-left:12px;">Кроків: <input type="number" id="steps" value="10" min="1"></label>
+    </div>
+
+    <div class="row">
+      <button id="start-btn">Запустити</button>
+      <span id="task-id" class="mono" style="margin-left:10px;"></span>
+    </div>
+
+    <div class="row">
+      <div class="progress"><div id="bar" class="bar"></div></div>
+      <div id="status" class="mono muted" style="margin-top:6px;"></div>
+    </div>
+
+    <div class="row">
+      <a href="/" style="color:#2563eb;">← Повернутись у чат</a>
+    </div>
+  </div>
+
+<script>
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "/login";
+
+const $ = (id) => document.getElementById(id);
+const startBtn = $("start-btn");
+const bar = $("bar");
+const statusEl = $("status");
+const taskEl = $("task-id");
+const sec = $("sec");
+const steps = $("steps");
+
+let pollTimer = null;
+
+startBtn.onclick = async () => {
+  clearInterval(pollTimer);
+  bar.style.width = "0%";
+  statusEl.textContent = "";
+  taskEl.textContent = "";
+
+  const qs = new URLSearchParams({ seconds: sec.value || 10, steps: steps.value || 10 });
+  const res = await fetch("/tasks/start?" + qs.toString(), {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    statusEl.textContent = "Помилка старту: " + (data.detail || res.status);
+    return;
+  }
+
+  const taskId = data.task_id;
+  taskEl.textContent = "task: " + taskId;
+
+  pollTimer = setInterval(async () => {
+    const r = await fetch("/tasks/" + taskId + "/status");
+    const s = await r.json();
+
+    let txt = "state=" + s.state;
+    if (typeof s.current !== "undefined" && typeof s.total !== "undefined") {
+      const pct = Math.round(s.current * 100 / s.total);
+      bar.style.width = pct + "%";
+      txt += ` | ${s.current}/${s.total} (${pct}%)`;
+    }
+    statusEl.textContent = txt;
+
+    if (s.state === "SUCCESS" || s.state === "FAILURE") {
+      clearInterval(pollTimer);
+      const r2 = await fetch("/tasks/" + taskId + "/result");
+      const d2 = await r2.json();
+      statusEl.textContent += " | result: " + JSON.stringify(d2.result || d2.error || d2);
+      bar.style.width = "100%";
+    }
+  }, 800);
+};
+</script>
+</body>
+</html>

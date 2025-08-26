@@ -1,0 +1,108 @@
+body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #dbeafe 0%, #f0fdf4 100%);
+    /* Ось це! */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.login-wrapper {
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.login-box,
+#login-form input[type="text"],
+#login-form input[type="password"],
+#login-form button {
+    box-sizing: border-box;
+}
+
+
+.login-box {
+    background: #fff;
+    padding: 48px 48px 38px 48px;
+    border-radius: 22px;
+    box-shadow: 0 8px 32px rgba(38, 94, 196, 0.14);
+    min-width: 420px;
+    max-width: 99vw;
+    width: 20%;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+    font-size: 19px;
+    padding: 15px 16px;
+}
+#login-form button {
+    font-size: 18px;
+    padding: 15px 0;
+}
+
+
+#login-title {
+    font-size: 1.55rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+}
+
+#login-form input[type="text"],
+#login-form input[type="password"] {
+    padding: 11px 13px;
+    border: 1.2px solid #c7d1e1;
+    border-radius: 8px;
+    font-size: 17px;
+    outline: none;
+    width: 100%;
+    margin-bottom: 0;
+    background: #f8fafc;
+    transition: border-color 0.2s;
+}
+#login-form input:focus {
+    border-color: #2563eb;
+    background: #fff;
+}
+
+#login-form button {
+    background: linear-gradient(90deg, #2563eb 80%, #1e40af 100%);
+    color: #fff;
+    border: none;
+    padding: 11px 0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.16s;
+    margin-top: 6px;
+    width: 100%;
+}
+#login-form button:hover {
+    background: linear-gradient(90deg, #1e40af 60%, #2563eb 100%);
+}
+#toggle-form {
+    font-size: 1rem;
+    margin-top: 6px;
+    display: inline-block;
+}
+.error {
+    color: #e11d48;
+    font-size: 16px;
+    margin-top: 7px;
+}
